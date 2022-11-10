@@ -4,7 +4,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-#define _DEBUG_
+#define DEBUG
+#include "debugUtils.h"
 
 bool setWifiMode(wifi_mode_t mode)
 {
@@ -19,22 +20,15 @@ void initWifi(const char *ssidSTA, const char *passSTA,
 
     WiFi.softAP(ssidAP, passAP);
 
-#ifdef _DEBUG_
-    Serial.print("ESP32 ssidSTA: ");
-    Serial.println(ssidSTA);
+    DEBUG_PRINT("ESP32 ssidSTA: " + static_cast<String>(ssidSTA));
 
-    Serial.print("ESP32 passSTA: ");
-    Serial.println(passSTA);
+    DEBUG_PRINT("ESP32 passSTA: " + static_cast<String>(passSTA));
 
-    Serial.print("ESP32 ssidAP: ");
-    Serial.println(ssidAP);
+    DEBUG_PRINT("ESP32 ssidAP: " + static_cast<String>(ssidAP));
 
-    Serial.print("ESP32 passAP: ");
-    Serial.println(passAP);
+    DEBUG_PRINT("ESP32 passAP: " + static_cast<String>(passAP));
 
-    Serial.print("ESP32 IP as soft AP: ");
-    Serial.println(WiFi.softAPIP());
-#endif // _DEBUG_
+    DEBUG_PRINT("ESP32 IP as soft AP: " + WiFi.softAPIP().toString());
 }
 
 bool wifiConnectSTA()
@@ -42,26 +36,21 @@ bool wifiConnectSTA()
     if (WiFi.status() != WL_CONNECTED)
     {
 
-#ifdef _DEBUG_
-        Serial.print("Connecting");
-#endif // _DEBUG_
+        DEBUG_PRINT("Connecting");
 
         int n = 0;
         while (WiFi.status() != WL_CONNECTED && n < 60)
         {
             delay(1000);
-            Serial.print(".");
+            DEBUG_PRINT(".");
             n++;
         }
 
         if (WiFi.status() == WL_CONNECTED)
         {
 
-#ifdef _DEBUG_
-            Serial.println("\nConnected...");
-            Serial.print("ESP32 IP on the WiFi network: ");
-            Serial.println(WiFi.localIP());
-#endif // _DEBUG_
+            DEBUG_PRINT("\nConnected...");
+            DEBUG_PRINT("ESP32 IP on the WiFi network: " + WiFi.localIP().toString());
         }
         else
         {
@@ -87,11 +76,7 @@ bool wifiConfigAP(IPAddress ip, IPAddress subnet = IPAddress(255, 255, 255, 0))
 
     if (status)
     {
-
-#ifdef _DEBUG_
-        Serial.print("ESP32 IP as soft AP: ");
-        Serial.println(WiFi.softAPIP());
-#endif // _DEBUG_
+        DEBUG_PRINT("ESP32 IP as soft AP: " + WiFi.softAPIP().toString());
 
         return true;
     }

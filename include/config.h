@@ -1,4 +1,4 @@
-#ifndef _CONFIGWIFI_H_
+#ifndef _CONFIG_H_
 #define _CONFIGWIFI_H_
 
 #include <Arduino.h>
@@ -9,7 +9,10 @@
 #include "saveFlash.h"
 #include "configInit.h"
 
-class configWifi
+#define DEBUG
+#include "debugUtils.h"
+
+class Config
 {
 private:
     wifi_mode_t wifiType;
@@ -55,7 +58,7 @@ private:
 
         serializeJson(doc, json);
 
-        Serial.println(json);
+        DEBUG_PRINT(json);
 
         return json;
     }
@@ -98,11 +101,11 @@ private:
     }
 
 public:
-    configWifi(String config)
-    {
-        DeserializeObject(config);
-    }
-
+    /*     Config(String config)
+        {
+            DeserializeObject(config);
+        }
+     */
     /*     configWifi(wifi_mode_t _wifiType, String _ssidSTA, String _ssidAP, String _passSTA,
                    String _passAP, String host, String _IPap, String _IPsta,
                    String _gateway, String _subnet)
@@ -124,22 +127,35 @@ public:
             SerializeObject();
         } */
 
-    configWifi()
+    Config()
     {
-        wifiType = _wifiType;
+        if (!existKey("config", "config"))
+        {
 
-        ssidSTA = _ssidSTA;
-        passSTA = _passSTA;
+            wifiType = initWifiType;
 
-        ssidAP = _ssidAP;
-        passAP = _passAP;
+            ssidSTA = initSsidSTA;
+            passSTA = initPassSTA;
 
-        IPap = _IPap;
-        hostname = _host;
+            ssidAP = initSsidAP;
+            passAP = initPassAP;
 
-        IPsta = _IPsta;
-        gateway = _gateway;
-        subnet = _subnet;
+            hostname = initHost;
+
+            IPap = initIPap;
+
+            IPsta = initIPsta;
+            gateway = initGateway;
+            subnet = initSubnet;
+
+            saveChange();
+        }
+        else
+        {
+            DeserializeObject(readMemFlash("config", "config"));
+        }
+
+        DEBUG_PRINT("Configuracion de red= " + readMemFlash("config", "config"));
     };
 
     void saveChange() { saveMemFlash("config", "config", SerializeObject()); };

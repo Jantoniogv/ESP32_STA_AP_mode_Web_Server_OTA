@@ -4,21 +4,20 @@
 
 #include <wifi.h>
 
-wifi_mode_t _wifiType = WIFI_MODE_APSTA;
+wifi_mode_t initWifiType = WIFI_MODE_APSTA;
 
-String _ssidSTA = "DIGIFIBRA-Ap99";
-String _ssidAP = "MyESP32AP_2022";
+String initSsidSTA = "DIGIFIBRA-Ap99";
+String initSsidAP = "MyESP32AP_2022";
 
-String _passSTA = "612018_2482019";
-String _passAP = "adminadmin";
+String initPassSTA = "612018_2482019";
+String initPassAP = "adminadmin";
 
-String _host = "ESP32_2022";
+String initHost = "ESP32_2022";
 
-String _IPap = "192.168.10.1";
-String _IPsta = "0.0.0.0";
-String _gateway = "0.0.0.0";
-String _subnet = "0.0.0.0";
+String initIPap = "192.168.10.1";
 
-bool reset = 1;
+String initIPsta = "0.0.0.0";
+String initGateway = "0.0.0.0";
+String initSubnet = "0.0.0.0";
 
-#endif //_CONFIG_H_
+#endif //_CONFIGINIT_H_

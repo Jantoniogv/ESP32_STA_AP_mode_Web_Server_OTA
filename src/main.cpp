@@ -2,105 +2,70 @@
 
 #include "saveFlash.h"
 #include "configInit.h"
-#include "configWifi.h"
+#include "config.h"
 #include "wifi_connect.h"
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
 
-#define _DEBUG_
+#define DEBUG
+#include "debugUtils.h"
+
+AsyncWebServer server(80);
 
 void setup()
 {
 
-#ifdef _DEBUG_
+  // Inicializa la conexion serial
   Serial.begin(115200);
-#endif // _DEBUG_
 
   eraseFlash("config");
 
-  //***** Configuracion del wifi *****//
-  configWifi wifiData;
-
-  if (!existKey("config", "reset"))
-  {
-    wifiData.saveChange();
-
-#ifdef _DEBUG_
-    Serial.println("Configuracion de red= " + readMemFlash("config", "config"));
-    Serial.println("Configuracion de reset= " + readMemFlash("config", "reset"));
-#endif
-    saveMemFlash("config", "reset", "0");
-  }
-  else
-  {
-
-    bool reset = (bool)readMemFlash("config", "reset").toInt();
-
-    if (reset)
-    {
-      wifiData.saveChange();
-
-      saveMemFlash("config", "reset", "0");
-    }
-    else
-    {
-
-      String config = readMemFlash("config", "config");
-
-      configWifi _wifiData(config);
-
-      wifiData.setWifiType(_wifiData.getWifiType());
-
-      wifiData.setSsidSTA(_wifiData.getSsidSTA());
-      wifiData.setPassSTA(_wifiData.getPassSTA());
-      wifiData.setSsidAP(_wifiData.getSsidAP());
-      wifiData.setPassAP(_wifiData.getPassAP());
-
-      wifiData.setHost(_wifiData.getHost());
-
-      wifiData.setIPap(_wifiData.getIPap());
-
-      wifiData.setIPsta(_wifiData.getIPsta());
-      wifiData.setGateway(_wifiData.getGateway());
-      wifiData.setSubnet(_wifiData.getSubnet());
-    }
-  }
+  // Inicializa el objeto con la variables de configuracion
+  Config configData;
 
   // Seteamos el modo de conexion
-  setWifiMode(wifiData.getWifiType());
+  setWifiMode(configData.getWifiType());
 
   // Iniciamos la conexion/es
-  initWifi(wifiData.getSsidSTA(), wifiData.getPassSTA(), wifiData.getSsidAP(), wifiData.getPassAP());
+  initWifi(configData.getSsidSTA(), configData.getPassSTA(), configData.getSsidAP(), configData.getPassAP());
 
   // Asignamos la IP del punto de acceso
   IPAddress IPap;
-  IPap.fromString(wifiData.getIPap());
+  IPap.fromString(configData.getIPap());
 
   wifiConfigAP(IPap);
 
   // Asignamos la IP del modo cliente en caso necesario
-  if (wifiData.getWifiType() == WIFI_MODE_APSTA || wifiData.getWifiType() == WIFI_MODE_STA)
+  if (configData.getWifiType() == WIFI_MODE_APSTA || configData.getWifiType() == WIFI_MODE_STA)
   {
     wifiConnectSTA();
 
-    if (wifiData.getIPsta() != _IPsta)
+    if (configData.getIPsta() != initIPsta)
     {
       IPAddress IP;
-      IP.fromString(wifiData.getIPap());
+      IP.fromString(configData.getIPap());
 
       IPAddress gateway;
-      gateway.fromString(wifiData.getGateway());
+      gateway.fromString(configData.getGateway());
 
       IPAddress subnet;
-      subnet.fromString(wifiData.getSubnet());
+      subnet.fromString(configData.getSubnet());
 
       wificConfigSTA(IP, gateway, subnet);
     }
   }
-#ifdef _DEBUG_
-  Serial.println("Configuracion de red= " + readMemFlash("config", "config"));
-  Serial.println("Configuracion de reset= " + readMemFlash("config", "reset"));
-#endif
 
-  //***** Configuracion del servidor web *****//
+  DEBUG_PRINT("Configuracion de red= " + readMemFlash("config", "config"));
+
+  // Configuracion del servidor web
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(200, "text/plain", "Aqui mi ESP32"); });
+
+  AsyncElegantOTA.begin(&server); // Start ElegantOTA
+  server.begin();
+  Serial.println("HTTP server started");
 }
 
 void loop() {}
