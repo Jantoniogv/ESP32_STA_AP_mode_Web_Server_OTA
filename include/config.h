@@ -1,5 +1,5 @@
 #ifndef _CONFIG_H_
-#define _CONFIGWIFI_H_
+#define _CONFIG_H_
 
 #include <Arduino.h>
 #include <wifi.h>
@@ -88,45 +88,9 @@ private:
         setIPsta(doc["_IPsta"]);
         setGateway(doc["_gateway"]);
         setSubnet(doc["_subnet"]);
-        /*
-                String text = doc["text"];
-                int id = doc["id"];
-                bool stat = doc["status"];
-                float value = doc["value"];
-
-                Serial.println(text);
-                Serial.println(id);
-                Serial.println(stat);
-                Serial.println(value); */
     }
 
 public:
-    /*     Config(String config)
-        {
-            DeserializeObject(config);
-        }
-     */
-    /*     configWifi(wifi_mode_t _wifiType, String _ssidSTA, String _ssidAP, String _passSTA,
-                   String _passAP, String host, String _IPap, String _IPsta,
-                   String _gateway, String _subnet)
-        {
-
-            ssidSTA = _ssidSTA;
-            passSTA = _passSTA;
-
-            ssidAP = _ssidAP;
-            passAP = _passAP;
-
-            IPap = _IPap;
-            hostname = host;
-
-            IPsta = _IPsta;
-            gateway = _gateway;
-            subnet = _subnet;
-
-            SerializeObject();
-        } */
-
     Config()
     {
         if (!existKey("config", "config"))
@@ -157,6 +121,13 @@ public:
 
         DEBUG_PRINT("Configuracion de red= " + readMemFlash("config", "config"));
     };
+
+    /* static Config *getConfig()
+    {
+        static Config config;
+
+        return &config;
+    } */
 
     void saveChange() { saveMemFlash("config", "config", SerializeObject()); };
 
@@ -193,4 +164,4 @@ public:
     const String getSubnet() { return subnet; };
 };
 
-#endif //_CONFIGWIFI_H_
+#endif //_CONFIG_H_

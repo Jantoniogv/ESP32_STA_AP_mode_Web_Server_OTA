@@ -1,0 +1,176 @@
+#ifndef _SERVER_H
+#define _SERVER_H
+
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
+
+#include "saveFlash.h"
+#include "config.h"
+#include "pageConfig.h"
+
+#define DEBUG
+#include "debugUtils.h"
+
+AsyncWebServer server(80);
+
+String htmlConfig()
+{
+  Config config;
+
+  String response = (String)config_page_html;
+  response.replace("%ssidAP%", config.getSsidAP());
+  response.replace("%passAP%", config.getPassAP());
+  response.replace("%IPap%", config.getIPap());
+
+  response.replace("%ssidSTA%", config.getSsidSTA());
+  response.replace("%passSTA%", config.getPassSTA());
+
+  if (config.getIPsta() != "x.x.x.x")
+  {
+    response.replace("%IPsta%", config.getIPsta());
+  }
+  else
+  {
+    response.replace("%IPsta%", "");
+  }
+
+  return response;
+}
+
+void serverHandlers()
+{
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(200, "text/html", htmlConfig()); });
+
+  server.on("/change_conf", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
+              Config configData;
+    /* // List all parameters
+    int params = request->params();
+
+    for (int i = 0; i < params; i++)
+    {
+      AsyncWebParameter *p = request->getParam(i);
+      if (p->isPost())
+      {
+        Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      }
+    } */
+
+ // Check POST ssidAP
+    if (request->hasParam("ssidAP", true))
+    {
+      AsyncWebParameter *p = request->getParam("ssidAP", true);
+      if(p->value() != ""){
+      configData.setSsidAP( p->value());
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+
+    // Check POST passAP
+    if (request->hasParam("passAP", true))
+    {
+      AsyncWebParameter *p = request->getParam("passAP", true);
+      if(p->value() != ""){
+      configData.setPassAP( p->value());
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+
+ // Check POST IPap
+    if (request->hasParam("IPap", true))
+    {
+      AsyncWebParameter *p = request->getParam("IPap", true);
+      if(p->value() != ""){
+      configData.setIPap( p->value());
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+
+    // Check POST activate_wifi
+    if (request->hasParam("activate_wifi", true))
+    {
+      AsyncWebParameter *p = request->getParam("activate_wifi", true);
+if(p->value() == "on"){
+      configData.setWifiType(WIFI_MODE_APSTA);
+      }
+      else{
+        configData.setWifiType(WIFI_MODE_AP);
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      }
+  
+
+    // Check POST ssidSTA
+    if (request->hasParam("ssidSTA", true))
+    {
+      AsyncWebParameter *p = request->getParam("ssidSTA", true);
+      if(p->value() != ""){
+      configData.setSsidSTA( p->value());
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+
+ // Check POST passSTA
+    if (request->hasParam("passSTA", true))
+    {
+      AsyncWebParameter *p = request->getParam("passSTA", true);
+      if(p->value() != ""){
+      configData.setPassSTA( p->value());
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+
+    // Check POST IPsta
+    if (request->hasParam("IPsta", true))
+    {
+      AsyncWebParameter *p = request->getParam("IPsta", true);
+
+      if(p->value() != ""){
+      configData.setIPsta( p->value());
+      }
+
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
+    }
+
+// Guardamos los cambios
+    configData.saveChange();
+
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", "<h2>Reiniciando...</h2>");
+    request->send(response); 
+
+//vTaskDelay(10);
+    ESP.restart(); });
+
+  server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request)
+            { 
+              // Borra todas las claves del espacio de nombres en memoria
+              eraseFlash("config");
+              request->send(200, "text/html", "<h2>Restableciendo todos los valores..."); 
+              
+              //vTaskDelay(10);
+              ESP.restart(); });
+
+  server.on("/ESPControl.css", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(200, "text/css", config_page_css); });
+
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+              AsyncWebServerResponse *response = request->beginResponse_P(200, "image/x-icon", favicon_ico_gz, favicon_ico_gz_len);
+              response->addHeader("Content-Encoding", "gzip");
+              request->send(response); });
+
+  server.on("/logo.jpg", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+              AsyncWebServerResponse *response = request->beginResponse_P(200, "image/jpeg", logo_gz, logo_gz_len);
+              response->addHeader("Content-Encoding", "gzip");
+              request->send(response); });
+}
+
+#endif //_SERVER_H

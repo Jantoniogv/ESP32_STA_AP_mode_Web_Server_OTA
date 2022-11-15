@@ -1,28 +1,34 @@
 #include <Arduino.h>
 
-#include "saveFlash.h"
-#include "configInit.h"
 #include "config.h"
-#include "wifi_connect.h"
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncElegantOTA.h>
+#include "wifiConnect.h"
+#include "serverFunctions.h"
 
 #define DEBUG
 #include "debugUtils.h"
 
-AsyncWebServer server(80);
-
 void setup()
 {
-
-  // Inicializa la conexion serial
-  Serial.begin(115200);
-
-  eraseFlash("config");
+  // Borra todas las claves del espacio de nombres en memoria
+  // eraseFlash("config");
 
   // Inicializa el objeto con la variables de configuracion
   Config configData;
+
+  /*  // Tarea a implementar en caso necesario
+   TaskHandle_t handleMqtt = NULL;
+
+   xTaskCreatePinnedToCore(
+       taskMqtt,
+       "taskMqtt",
+       16000,
+       NULL,
+       1,
+       &handleMqtt,
+       1); */
+
+  // Inicializa la conexion serial
+  Serial.begin(115200);
 
   // Seteamos el modo de conexion
   setWifiMode(configData.getWifiType());
@@ -56,16 +62,23 @@ void setup()
     }
   }
 
-  DEBUG_PRINT("Configuracion de red= " + readMemFlash("config", "config"));
+  // Configura el servidor web
+  serverHandlers();
 
-  // Configuracion del servidor web
+  // Inicia ElegantOTA
+  AsyncElegantOTA.begin(&server);
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(200, "text/plain", "Aqui mi ESP32"); });
-
-  AsyncElegantOTA.begin(&server); // Start ElegantOTA
+  // Inicia el servidor
   server.begin();
-  Serial.println("HTTP server started");
+
+  DEBUG_PRINT("Servidor HTTP iniciado...");
+
+  DEBUG_PRINT("Configuracion de red= " + readMemFlash("config", "config"));
 }
 
-void loop() {}
+void loop()
+{
+  /* Serial.println("Estoy aqui en el loop");
+
+  vTaskDelay(pdMS_TO_TICKS(10)); */
+}
