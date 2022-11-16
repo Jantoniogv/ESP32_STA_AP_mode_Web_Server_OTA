@@ -22,10 +22,28 @@ String htmlConfig()
   response.replace("%passAP%", config.getPassAP());
   response.replace("%IPap%", config.getIPap());
 
+  response.replace("%IPap%", config.getIPap());
+
+  if (config.getWifiType() == WIFI_MODE_AP)
+  {
+    response.replace(R"rawliteral(<input
+            id="check_wifi"
+            type="checkbox"
+            name="activate_wifi"
+            checked
+          />)rawliteral",
+                     R"rawliteral(<input
+            id="check_wifi"
+            type="checkbox"
+            name="activate_wifi"
+          />)rawliteral");
+  }
+  Serial.println(config.getWifiType());
+
   response.replace("%ssidSTA%", config.getSsidSTA());
   response.replace("%passSTA%", config.getPassSTA());
 
-  if (config.getIPsta() != "x.x.x.x")
+  if (config.getIPsta() != "")
   {
     response.replace("%IPsta%", config.getIPsta());
   }
@@ -42,10 +60,17 @@ void serverHandlers()
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(200, "text/html", htmlConfig()); });
 
+  server.on("/ESPControl.css", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(200, "text/css", config_page_css); });
+
+  server.on("/ESPControl.js", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(200, "text/js", config_page_js); });
+
   server.on("/change_conf", HTTP_POST, [](AsyncWebServerRequest *request)
             {
               Config configData;
-    /* // List all parameters
+
+    // List all parameters
     int params = request->params();
 
     for (int i = 0; i < params; i++)
@@ -55,7 +80,7 @@ void serverHandlers()
       {
         Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
       }
-    } */
+    }
 
  // Check POST ssidAP
     if (request->hasParam("ssidAP", true))
@@ -94,16 +119,15 @@ void serverHandlers()
     if (request->hasParam("activate_wifi", true))
     {
       AsyncWebParameter *p = request->getParam("activate_wifi", true);
-if(p->value() == "on"){
+      if(p->value() == "on"){
       configData.setWifiType(WIFI_MODE_APSTA);
+      }
+      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
       }
       else{
         configData.setWifiType(WIFI_MODE_AP);
+        Serial.println("WifiSTA=off");
       }
-
-      Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
-      }
-  
 
     // Check POST ssidSTA
     if (request->hasParam("ssidSTA", true))
@@ -115,6 +139,10 @@ if(p->value() == "on"){
 
       Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
     }
+    else{
+        configData.setSsidSTA("");
+        Serial.println("ssidSTA=off");
+      }
 
  // Check POST passSTA
     if (request->hasParam("passSTA", true))
@@ -126,6 +154,10 @@ if(p->value() == "on"){
 
       Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
     }
+    else{
+        configData.setPassSTA("");
+        Serial.println("passSTA=off");
+      }
 
     // Check POST IPsta
     if (request->hasParam("IPsta", true))
@@ -138,9 +170,15 @@ if(p->value() == "on"){
 
       Serial.printf("POSTValue[%s]: %s\n", p->name().c_str(), p->value().c_str());
     }
+    else{
+        configData.setIPsta("");
+        Serial.println("IPsta=off");
+      }
 
-// Guardamos los cambios
+    // Guardamos los cambios
     configData.saveChange();
+
+    //readMemFlash("config", "config");
 
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", "<h2>Reiniciando...</h2>");
     request->send(response); 
@@ -156,9 +194,6 @@ if(p->value() == "on"){
               
               //vTaskDelay(10);
               ESP.restart(); });
-
-  server.on("/ESPControl.css", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(200, "text/css", config_page_css); });
 
   server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
             {

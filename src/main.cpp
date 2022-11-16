@@ -30,11 +30,8 @@ void setup()
   // Inicializa la conexion serial
   Serial.begin(115200);
 
-  // Seteamos el modo de conexion
-  setWifiMode(configData.getWifiType());
-
   // Iniciamos la conexion/es
-  initWifi(configData.getSsidSTA(), configData.getPassSTA(), configData.getSsidAP(), configData.getPassAP());
+  initWifi(configData.getWifiType(), configData.getSsidSTA(), configData.getPassSTA(), configData.getSsidAP(), configData.getPassAP());
 
   // Asignamos la IP del punto de acceso
   IPAddress IPap;

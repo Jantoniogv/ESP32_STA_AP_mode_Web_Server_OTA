@@ -16,8 +16,8 @@ String initHost = "ESP32_2022";
 
 String initIPap = "192.168.10.1";
 
-String initIPsta = "x.x.x.x";
-String initGateway = "x.x.x.x";
-String initSubnet = "x.x.x.x";
+String initIPsta = "";
+String initGateway = "";
+String initSubnet = "";
 
 #endif //_CONFIGINIT_H_

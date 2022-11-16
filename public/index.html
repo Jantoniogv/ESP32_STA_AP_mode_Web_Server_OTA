@@ -16,7 +16,7 @@
     <link href="ESPControl.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <form class="form" action="/change_conf">
+    <form class="form" action="/change_conf" method="post">
       <h1>Configuracion ESP32</h1>
       <div class="logo">
         <img src="logo.jpg" alt="Logo" />
@@ -25,21 +25,28 @@
         <label class="label" for="ssidAP">SSID punto de acceso</label>
         <input type="text" value="%ssidAP%" name="ssidAP" />
         <label class="label" for="passSTA">Contraseña punto de acceso</label>
-        <input type="password" value="%passAP%" name="passAP" required />
+        <input type="password" value="%passAP%" name="passAP" />
         <label class="label" for="IPap">IP punto de acceso</label>
         <input type="text" value="%IPap%" name="IPap" />
         <div class="checkbox">
-          <input type="checkbox" checked="checked" name="activate_wifi" />
+          <input
+            id="check_wifi"
+            type="checkbox"
+            name="activate_wifi"
+            checked
+            value="1"
+          />
           <span class="label">Activar wifi local</span>
         </div>
         <label class="label" for="ssidSTA">SSID wifi local</label>
-        <input type="text" value="%ssidSTA%" name="ssidSTA" />
+        <input id="ssidSTA" type="text" value="%ssidSTA%" name="ssidSTA" />
         <label class="label" for="passSTA">Contraseña wifi local</label>
-        <input type="password" value="%passSTA%" name="passSTA" />
+        <input id="passSTA" type="password" value="%passSTA%" name="passSTA" />
         <label class="label" for="IPsta">IP wifi local</label>
-        <input type="text" value="%IPsta%" name="IPsta" />
+        <input id="IPsta" type="text" value="%IPsta%" name="IPsta" />
       </div>
       <button class="button-save" type="submit">Guardar y reiniciar</button>
     </form>
+    <script src="ESPControl.js"></script>
   </body>
 </html>

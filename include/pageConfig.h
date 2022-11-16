@@ -51,6 +51,30 @@ const char config_page_css[] = R"rawliteral(
     }
 )rawliteral";
 
+const char config_page_js[] = R"rawliteral(
+const changeFormWifiSTA = () => {
+  if (!document.getElementById("check_wifi").checked) {
+    document.getElementById("ssidSTA").disabled = true;
+    document.getElementById("passSTA").disabled = true;
+    document.getElementById("IPsta").disabled = true;
+
+    document.getElementById("ssidSTA").value = "";
+    document.getElementById("passSTA").value = "";
+    document.getElementById("IPsta").value = "";
+  } else {
+    document.getElementById("ssidSTA").disabled = false;
+    document.getElementById("passSTA").disabled = false;
+    document.getElementById("IPsta").disabled = false;
+  }
+};
+
+changeFormWifiSTA();
+
+document
+  .getElementById("check_wifi")
+  .addEventListener("change", changeFormWifiSTA);
+)rawliteral";
+
 const char config_page_html[] = R"rawliteral(
 <!DOCTYPE html>
 <html>
@@ -70,7 +94,7 @@ const char config_page_html[] = R"rawliteral(
     <link href="ESPControl.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <form class="form" action="/change_conf" method="POST">
+    <form class="form" action="/change_conf" method="post">
       <h1>Configuracion ESP32</h1>
       <div class="logo">
         <img src="logo.jpg" alt="Logo" />
@@ -83,23 +107,29 @@ const char config_page_html[] = R"rawliteral(
         <label class="label" for="IPap">IP punto de acceso</label>
         <input type="text" value="%IPap%" name="IPap" />
         <div class="checkbox">
-          <input type="checkbox" checked="checked" name="activate_wifi" />
+          <input
+            id="check_wifi"
+            type="checkbox"
+            name="activate_wifi"
+            checked
+          />
           <span class="label">Activar wifi local</span>
         </div>
         <label class="label" for="ssidSTA">SSID wifi local</label>
-        <input type="text" value="%ssidSTA%" name="ssidSTA" />
+        <input id="ssidSTA" type="text" value="%ssidSTA%" name="ssidSTA" />
         <label class="label" for="passSTA">Contraseña wifi local</label>
-        <input type="password" value="%passSTA%" name="passSTA" />
+        <input id="passSTA" type="password" value="%passSTA%" name="passSTA" />
         <label class="label" for="IPsta">IP wifi local</label>
-        <input type="text" value="%IPsta%" name="IPsta" />
+        <input id="IPsta" type="text" value="%IPsta%" name="IPsta" />
       </div>
       <button class="button-save" type="submit">Guardar y reiniciar</button>
     </form>
+    <script src="ESPControl.js"></script>
   </body>
 </html>
 )rawliteral";
 
-// File: favicon.ico.gz, Size: 726
+// favicon
 #define favicon_ico_gz_len 12822
 const uint8_t favicon_ico_gz[] PROGMEM = {
     0x1F, 0x8B, 0x08, 0x08, 0x37, 0x9B, 0x72, 0x63, 0x04, 0x00, 0x61, 0x2E, 0x6A, 0x70, 0x67, 0x00,
@@ -905,6 +935,7 @@ const uint8_t favicon_ico_gz[] PROGMEM = {
     0x18, 0x3E, 0x23, 0xD9, 0x81, 0xD4, 0xDD, 0x41, 0xE4, 0xE6, 0x08, 0xCD, 0xD3, 0x3F, 0x07, 0x01,
     0x1E, 0x88, 0x41, 0x66, 0x00, 0x00};
 
+// Logo
 #define logo_gz_len 22063
 const uint8_t logo_gz[] PROGMEM = {
     0x1F, 0x8B, 0x08, 0x08, 0x71, 0x90, 0x72, 0x63, 0x04, 0x00, 0x61, 0x2E, 0x6A, 0x70, 0x67, 0x00,

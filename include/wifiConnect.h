@@ -9,16 +9,16 @@
 #define DEBUG
 #include "debugUtils.h"
 
-bool setWifiMode(wifi_mode_t mode)
-{
-    return WiFi.mode(mode);
-}
-
-void initWifi(const char *ssidSTA, const char *passSTA,
+void initWifi(wifi_mode_t mode, const char *ssidSTA, const char *passSTA,
               const char *ssidAP, const char *passAP)
 {
 
-    WiFi.begin(ssidSTA, passSTA);
+    WiFi.mode(mode);
+
+    if (mode != WIFI_MODE_AP)
+    {
+        WiFi.begin(ssidSTA, passSTA);
+    }
 
     WiFi.softAP(ssidAP, passAP);
 
@@ -41,9 +41,9 @@ bool wifiConnectSTA()
         DEBUG_PRINT("Connecting");
 
         int n = 0;
-        while (WiFi.status() != WL_CONNECTED && n < 60)
+        while (WiFi.status() != WL_CONNECTED && n < 20)
         {
-            delay(1000);
+            vTaskDelay(pdMS_TO_TICKS(1000));
             DEBUG_PRINT(".");
             n++;
         }
